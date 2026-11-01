@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEV AI - Personal Assistant</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ font-family:Arial,sans-serif;color:white;min-height:100vh;
+ background:#070b19;
+}
+body:before{
+ content:"";position:fixed;inset:-40%;z-index:-1;
+ background:
+ radial-gradient(circle at 20% 30%,#075b9e,transparent 35%),
+ radial-gradient(circle at 80% 20%,#6b239e,transparent 35%),
+ radial-gradient(circle at 50% 90%,#075b76,transparent 35%);
+ animation:bg 12s infinite alternate;
+}
+@keyframes bg{to{transform:translate(6%,5%) scale(1.2)}}
+
+header{
+ padding:20px;display:flex;justify-content:space-between;
+ align-items:center;border-bottom:1px solid #ffffff22;
+}
+.logo{font-size:23px;font-weight:bold;color:#65eaff}
+.container{max-width:850px;margin:25px auto;padding:15px}
+.hidden{display:none!important}
+
+.panel{
+ background:#ffffff0c;border:1px solid #ffffff25;
+ border-radius:18px;padding:20px;margin:16px 0;
+ backdrop-filter:blur(15px);
+}
+h2{color:#68e5ff;margin-bottom:15px;font-size:20px}
+input,select{
+ width:100%;padding:13px;margin:7px 0 13px;
+ border:1px solid #ffffff35;border-radius:10px;
+ background:#111c34;color:white;outline:none;
+}
+button{
+ padding:12px 18px;margin:5px;border:0;
+ border-radius:10px;color:white;font-weight:bold;
+ background:linear-gradient(100deg,#087ce9,#793de5);
+ cursor:pointer;
+}
+button:hover{filter:brightness(1.2)}
+.primary{width:100%;margin:10px 0}
+.hero{text-align:center;padding:25px 5px}
+.hero h1{font-size:32px;margin-bottom:10px}
+.hero h1 span{color:#60e6ff}
+.clock{font-size:40px;color:#69eaff;margin:18px}
+.orb{
+ width:130px;height:130px;margin:25px auto;
+ display:grid;place-items:center;border-radius:50%;
+ font-size:55px;
+ background:radial-gradient(circle at 30% 25%,#9ffaff,#2761ba 55%,#17134c);
+ box-shadow:0 0 45px #38aaffaa;
+ animation:pulse 3s infinite;
+}
+@keyframes pulse{50%{transform:scale(1.07)}}
+label{font-size:13px;color:#b9c9df}
+.small{font-size:12px;color:#9eafc8;line-height:1.6}
+.chat{
+ height:250px;overflow-y:auto;padding:12px;
+ background:#050b19;border-radius:12px;margin-bottom:12px;
+}
+.msg{
+ background:#253650;padding:10px;border-radius:10px;
+ margin:8px 0;overflow-wrap:anywhere;line-height:1.5;
+}
+.user{background:#164c82;text-align:right}
+.row{display:flex;gap:5px}
+.row input{flex:1;min-width:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.reminder{background:#ffffff0c;padding:12px;border-radius:10px}
+#loginScreen{
+ min-height:85vh;display:grid;place-items:center;padding:18px;
+}
+.loginBox{
+ width:100%;max-width:390px;padding:28px;
+ background:#101a31dd;border:1px solid #ffffff30;
+ border-radius:23px;box-shadow:0 0 45px #276bba44;
+}
+.loginLogo{text-align:center;font-size:38px;color:#65eaff;margin-bottom:10px}
+.loginBox h2{text-align:center}
+footer{text-align:center;color:#8494ad;padding:25px;font-size:12px}
+
+@media(max-width:550px){
+ .grid{grid-template-columns:1fr}
+ .hero h1{font-size:26px}
+ .clock{font-size:34px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">✦ DEV AI</div>
+ <div id="headerStatus" class="small">PRIVATE ASSISTANT</div>
+</header>
+
+<!-- LOGIN -->
+<section id="loginScreen">
+ <div class="loginBox">
+  <div class="loginLogo">🤖</div>
+  <h2>DEV AI OWNER LOGIN</h2>
+  <p class="small" style="text-align:center;margin-bottom:20px">
+   Welcome Back, Dev Nayak
+  </p>
+
+  <label>Email Address</label>
+  <input id="email" type="email" placeholder="Your Firebase Email">
+
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Your Firebase Password">
+
+  <button class="primary" id="loginBtn" onclick="login()">
+   🔐 Secure Login
+  </button>
+
+  <p id="loginError" class="small" style="color:#ff8585"></p>
+  <p class="small" style="text-align:center">
+   Protected by Firebase Authentication
+  </p>
+ </div>
+</section>
+
+<!-- DASHBOARD -->
+<main id="dashboard" class="container hidden">
+
+ <section class="hero">
+  <h1>Welcome Boss, <span>Dev Nayak</span></h1>
+  <p class="small">YOUR PERSONAL AI LIFE ASSISTANT</p>
+
+  <div class="clock" id="clock">00:00:00</div>
+  <div id="date" class="small"></div>
+
+  <div class="orb">🤖</div>
+
+  <h2 id="greeting">Hello Boss!</h2>
+  <p id="statusText">आपका DEV AI तैयार है।</p>
+
+  <button onclick="startAssistant()">▶ Start Assistant</button>
+  <button onclick="stopVoice()">🔇 Stop Voice</button>
+  <button onclick="logout()">Logout ↗</button>
+ </section>
+
+ <section class="panel">
+  <h2>💬 Talk With DEV AI</h2>
+
+  <div id="chat" class="chat">
+   <div class="msg">
+    नमस्ते Boss! मैं आपका Personal AI Assistant हूँ।
+    बताइए, मैं आपकी क्या मदद कर सकता हूँ?
+   </div>
+  </div>
+
+  <div class="row">
+   <input id="question" placeholder="अपना सवाल लिखें..."
+    onkeydown="if(event.key==='Enter')sendMessage()">
+   <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <button onclick="listen()">🎙 Speak</button>
+ </section>
+
+ <section class="panel">
+  <h2>⏰ Daily Reminders</h2>
+
+  <div class="grid">
+   <div class="reminder">
+    🌙 Sleep Time
+    <input type="time" id="sleepTime" value="22:00">
+   </div>
+
+   <div class="reminder">
+    🧼 Face Wash
+    <input type="time" id="faceTime" value="07:00">
+   </div>
+
+   <div class="reminder">
+    💧 Water
+    <input type="time" id="waterTime" value="12:00">
+   </div>
+
+   <div class="reminder">
+    ☀️ Morning Routine
+    <input type="time" id="morningTime" value="08:00">
+   </div>
+  </div>
+
+  <button onclick="saveReminders()">Save Reminders</button>
+  <p class="small">रिमाइंडर के लिए वेबसाइट खुली रहनी चाहिए।</p>
+ </section>
+
+ <section class="panel">
+  <h2>⚙️ Groq AI Settings</h2>
+
+  <label>Groq API Key</label>
+  <input type="password" id="apiKey" placeholder="Enter Groq API Key">
+
+  <label>AI Model</label>
+  <select id="model">
+   <option value="openai/gpt-oss-20b">GPT OSS 20B</option>
+   <option value="openai/gpt-oss-120b">GPT OSS 120B</option>
+   <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+  </select>
+
+  <button onclick="saveKey()">Save API Settings</button>
+  <p id="keyStatus" class="small">API Key सेट नहीं है।</p>
+ </section>
+
+ <section class="panel">
+  <h2>✨ Smart Features</h2>
+
+  <div class="grid">
+   <button onclick="speak('Boss, पानी पीने का समय हो गया है।')">💧 Water</button>
+   <button onclick="speak('Boss, अपनी आंखों को आराम दीजिए।')">👀 Eye Break</button>
+   <button onclick="speak('Boss, थोड़ा आराम कर लीजिए।')">🧘 Break</button>
+   <button onclick="speak('Boss, आप अच्छा काम कर रहे हैं।')">⭐ Motivation</button>
+  </div>
+ </section>
+
+</main>
+
+<footer>DEV AI | PERSONAL ASSISTANT</footer>
+
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+
+import {
+ getAuth,
+ signInWithEmailAndPassword,
+ onAuthStateChanged,
+ signOut
+} from
+"https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyA_JqwaOYqMDP09zJyMKukDKbLUcEg60S0",
+ authDomain: "ai-assistant-663a1.firebaseapp.com",
+ projectId: "ai-assistant-663a1",
+ storageBucket: "ai-assistant-663a1.firebasestorage.app",
+ messagingSenderId: "501596254491",
+ appId: "1:501596254491:web:94a284bc49172889b8e3be"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const loginScreen = document.getElementById("loginScreen");
+const dashboard = document.getElementById("dashboard");
+const loginError = document.getElementById("loginError");
+
+window.login = async function(){
+
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
+
+ if(!email || !password){
+  loginError.textContent="Email और Password दोनों भरें।";
+  return;
+ }
+
+ const btn=document.getElementById("loginBtn");
+ btn.disabled=true;
+ btn.textContent="Checking...";
+
+ try{
+  await signInWithEmailAndPassword(auth,email,password);
+  loginError.textContent="";
+ }catch(error){
+  loginError.textContent=error.message;
+ }finally{
+  btn.disabled=false;
+  btn.textContent="🔐 Secure Login";
+ }
+};
+
+onAuthStateChanged(auth,user=>{
+ if(user){
+  loginScreen.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+  document.getElementById("headerStatus").textContent="● OWNER ONLINE";
+  document.getElementById("greeting").textContent="Welcome Boss, Dev Nayak!";
+ }else{
+  dashboard.classList.add("hidden");
+  loginScreen.classList.remove("hidden");
+  document.getElementById("headerStatus").textContent="PRIVATE LOGIN";
+ }
+});
+
+window.logout=async function(){
+ stopVoice();
+ await signOut(auth);
+};
+
+let voiceEnabled=false;
+let lastAlerts={};
+
+window.speak=function(text){
+ if(!("speechSynthesis" in window))return;
+
+ speechSynthesis.cancel();
+
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang="hi-IN";
+ utterance.rate=.92;
+ utterance.pitch=1.05;
+
+ speechSynthesis.speak(utterance);
+ document.getElementById("statusText").textContent=text;
+};
+
+window.startAssistant=function(){
+ voiceEnabled=true;
+ speak("Hello Boss! आपका DEV AI तैयार है।");
+ if("Notification" in window && Notification.permission==="default"){
+  Notification.requestPermission();
+ }
+};
+
+window.stopVoice=function(){
+ voiceEnabled=false;
+ speechSynthesis.cancel();
+ document.getElementById("statusText").textContent="Voice बंद है।";
+};
+
+function updateClock(){
+ const now=new Date();
+
+ document.getElementById("clock").textContent=
+ now.toLocaleTimeString("en-IN");
+
+ document.getElementById("date").textContent=
+ now.toLocaleDateString("hi-IN",{
+  weekday:"long",day:"numeric",month:"long",year:"numeric"
+ });
+}
+
+updateClock();
+setInterval(updateClock,1000);
+
+let reminders={
+ sleep:"22:00",
+ face:"07:00",
+ water:"12:00",
+ morning:"08:00"
+};
+
+function loadReminders(){
+ try{
+  const saved=JSON.parse(localStorage.getItem("devReminders"));
+  if(saved)reminders={...reminders,...saved};
+ }catch(e){}
+
+ for(const key in reminders){
+  document.getElementById(key+"Time").value=reminders[key];
+ }
+}
+
+window.saveReminders=function(){
+ for(const key in reminders){
+  reminders[key]=document.getElementById(key+"Time").value;
+ }
+
+ localStorage.setItem("devReminders",JSON.stringify(reminders));
+ alert("Boss! Reminders Save हो गए।");
+};
+
+loadReminders();
+
+function checkReminders(){
+ if(!auth.currentUser)return;
+
+ const now=new Date();
+
+ const current=
+ String(now.getHours()).padStart(2,"0")+":"+
+ String(now.getMinutes()).padStart(2,"0");
+
+ const today=now.toDateString();
+
+ const items=[
+  ["sleep","Boss, अब आपके सोने का समय हो गया है!"],
+  ["face","Boss, अब फेस वॉश करने का समय हो गया है!"],
+  ["water","Boss, पानी पीने का समय हो गया है!"],
+  ["morning","Good Morning Boss! आपका नया दिन शुरू हो गया है!"]
+ ];
+
+ items.forEach(([key,message])=>{
+  const id=key+today;
+
+  if(current===reminders[key]&&!lastAlerts[id]){
+   lastAlerts[id]=true;
+
+   if(voiceEnabled)speak(message);
+
+   if("Notification" in window &&
+      Notification.permission==="granted"){
+    new Notification("DEV AI Reminder",{body:message});
+   }
+  }
+ });
+}
+
+setInterval(checkReminders,10000);
+
+window.saveKey=function(){
+ const key=document.getElementById("apiKey").value.trim();
+
+ if(!key){
+  alert("Groq API Key डालें।");
+  return;
+ }
+
+ sessionStorage.setItem("devGroqKey",key);
+
+ sessionStorage.setItem(
+  "devGroqModel",
+  document.getElementById("model").value
+ );
+
+ document.getElementById("keyStatus").textContent=
+ "API Key Session में सेव है।";
+};
+
+const oldKey=sessionStorage.getItem("devGroqKey");
+
+if(oldKey){
+ document.getElementById("apiKey").value=oldKey;
+}
+
+const oldModel=sessionStorage.getItem("devGroqModel");
+
+if(oldModel){
+ document.getElementById("model").value=oldModel;
+}
+
+function addMessage(text,type=""){
+ const div=document.createElement("div");
+ div.className="msg "+type;
+ div.textContent=text;
+
+ const chat=document.getElementById("chat");
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+window.sendMessage=async function(){
+
+ const input=document.getElementById("question");
+ const question=input.value.trim();
+
+ if(!question)return;
+
+ input.value="";
+ addMessage(question,"user");
+
+ const key=sessionStorage.getItem("devGroqKey");
+
+ if(!key){
+  const answer="Boss, पहले Groq API Key सेटिंग में डालिए।";
+  addMessage(answer);
+  if(voiceEnabled)speak(answer);
+  return;
+ }
+
+ const loading=document.createElement("div");
+ loading.className="msg";
+ loading.textContent="DEV AI सोच रहा है...";
+
+ document.getElementById("chat").appendChild(loading);
+
+ try{
+
+  const model=
+   sessionStorage.getItem("devGroqModel")||
+   "openai/gpt-oss-20b";
+
+  const response=await fetch(
+   "https://api.groq.com/openai/v1/chat/completions",
+   {
+    method:"POST",
+    headers:{
+     "Content-Type":"application/json",
+     "Authorization":"Bearer "+key
+    },
+    body:JSON.stringify({
+     model:model,
+     messages:[
+      {
+       role:"system",
+       content:"तुम DEV AI हो। तुम हिंदी में जवाब देने वाले helpful personal assistant हो। यूजर को Boss कहो।"
+      },
+      {role:"user",content:question}
+     ],
+     temperature:.7,
+     max_completion_tokens:700
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.error?.message||"API Error");
+  }
+
+  const answer=
+   data.choices?.[0]?.message?.content||
+   "माफ कीजिए Boss, जवाब नहीं मिला।";
+
+  loading.remove();
+  addMessage(answer);
+
+  if(voiceEnabled)speak(answer);
+
+ }catch(error){
+  loading.remove();
+  addMessage("Error: "+error.message);
+ }
+};
+
+window.listen=function(){
+
+ const Recognition=
+  window.SpeechRecognition||
+  window.webkitSpeechRecognition;
+
+ if(!Recognition){
+  alert("Voice Input के लिए Chrome Browser इस्तेमाल करें।");
+  return;
+ }
+
+ const recognition=new Recognition();
+ recognition.lang="hi-IN";
+
+ recognition.onstart=()=>{
+  document.getElementById("statusText").textContent=
+  "Boss, मैं सुन रहा हूं...";
+ };
+
+ recognition.onresult=event=>{
+  document.getElementById("question").value=
+  event.results[0][0].transcript;
+
+  sendMessage();
+ };
+
+ recognition.onerror=()=>{
+  document.getElementById("statusText").textContent=
+  "Microphone Permission जाँचें।";
+ };
+
+ recognition.start();
+};
+
+</script>
+</body>
+  </html>
+  
